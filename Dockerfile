@@ -15,7 +15,8 @@ RUN pip3 \
 COPY app /app
 COPY entrypoint.sh /
 
-RUN python3 manage.py migrate && \
+RUN mkdir -p data && \
+    python3 manage.py migrate && \
     python3 manage.py collectstatic --no-input
 
 ENTRYPOINT '/entrypoint.sh'

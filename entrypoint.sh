@@ -7,12 +7,13 @@ set -o nounset   # abort on unbound variable
 
 set -e
 
+cd /app
 # python3 create_admin_user.py \
 #     --username "$ADMIN_USER" \
 #     --password "$ADMIN_PASSWORD" \
 #     --email "$ADMIN_EMAIL"
 
-# echo $*
+echo "params:" $*
 # if [ -z ${DEBUG+0} ];
 # then
 #     DEBUG="0"
