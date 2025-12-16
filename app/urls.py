@@ -25,5 +25,5 @@ if settings.DEBUG:
         static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     )
 
-handler500 = 'wikiproject.views.server_error'
-handler404 = 'wikiproject.views.page_not_found'
+handler500 = 'views.server_error'
+handler404 = 'views.page_not_found'
