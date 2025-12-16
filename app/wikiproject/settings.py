@@ -9,19 +9,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
-from __future__ import unicode_literals
-
 import os
-import sys
 
 from django.urls import reverse_lazy
-from django.utils.crypto import get_random_string
-
-
-def generate_secret_key(filename):
-    chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
-    with open(filename, "w") as file:
-        file.write("SECRET_KEY='{0}'".format(get_random_string(50, chars)))
+from django.utils.crypto import get_random_string  # noqa
 
 
 def get_bool_var(var: str, default: bool) -> bool:
@@ -43,18 +34,14 @@ PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_DIR = os.path.dirname(PROJECT_DIR)
 
 settings_dir = os.path.abspath(os.path.dirname(__file__))
-sys.path.append(settings_dir)
-sys.path.append(settings_dir + '/../../')
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
+# sys.path.append(settings_dir)
+# sys.path.append(settings_dir + '/../../')
 
 SECRET_KEY = 'get_random_string(50)'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', False)
 
-print(' >> Debug is %s' % str(DEBUG))
+print(' >> Debug is %s' % DEBUG)
 
 ALLOWED_HOSTS = ['*']
 
@@ -84,7 +71,6 @@ INSTALLED_APPS = [
 ]
 
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
-
 
 MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -124,42 +110,24 @@ LOGIN_REDIRECT_URL = reverse_lazy('wiki:get', kwargs={'path': ''})
 
 DB_TYPE = os.getenv('DB_TYPE', 'sqlite3')
 
-if DB_TYPE == 'sqlite3':
-    DB_NAME = os.path.join(
-        PROJECT_DIR, 'db', os.getenv('DB_NAME', 'db.sqlite3')
-    )
-else:
-    DB_NAME = os.getenv('DB_NAME', 'riotkit_django_wiki')
 
-# Database
-# https://docs.djangoproject.com/en/1.9/ref/settings/#databases
+# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.' + DB_TYPE,
-        'NAME':  DB_NAME,
-        'USER': get_env('DB_USER', None),
-        'PASSWORD': get_env('DB_PASSWORD', None),
-        'HOST': get_env('DB_HOST', None),
-        'PORT': get_env('DB_PORT', None),
-        'CHARSET': get_env('DB_CHARSET', None),
-        'COLLATION': get_env('DB_COLLATION', None),
-        'DATAFILE': get_env('DB_ORA_DATAFILE', None),
-        'DATAFILE_TMP': get_env('DB_ORA_DATAFILE_TMP', None),
-        'DATAFILE_MAXSIZE': get_env('DB_ORA_DATAFILE_MAXSIZE', None),
-        'DATAFILE_TMP_MAXSIZE': get_env('DB_ORA_DATAFILE_TMP_MAXSIZE', None),
-        'DATAFILE_SIZE': get_env('DB_ORA_DATAFILE_SIZE', None)
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": "/app/data/wiki.db",
     }
 }
 
-if get_bool_var('USE_CACHE', False):
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.' + get_env('CACHE_TYPE', 'filebased.FileBasedCache'),  # noqa
-            'LOCATION': get_env('CACHE_LOCATION', '/tmp/django_cache'),
-            'KEY_PREFIX': get_env('CACHE_KEY_PREFIX', ''),
-            'TIMEOUT': int(get_env('CACHE_TIMEOUT', 300))
-        }
-    }
+# if get_bool_var('USE_CACHE', False):
+#     CACHES = {
+#         'default': {
+#             'BACKEND': 'django.core.cache.backends.' + get_env('CACHE_TYPE', 'filebased.FileBasedCache'),  # noqa
+#             'LOCATION': get_env('CACHE_LOCATION', '/tmp/django_cache'),
+#             'KEY_PREFIX': get_env('CACHE_KEY_PREFIX', ''),
+#             'TIMEOUT': int(get_env('CACHE_TIMEOUT', 300))
+#         }
+#     }
 
 
 # Password validation
@@ -192,7 +160,7 @@ LANGUAGE_CODE = os.getenv('LANGUAGE_CODE', 'en-US')
 SITE_ID = int(os.getenv('SITE_ID', 1))
 USE_I18N = True
 USE_L10N = True
-USE_TZ = get_bool_var('USE_TZ', True)
+# USE_TZ = get_bool_var('USE_TZ', True)
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
@@ -209,5 +177,7 @@ print(' >> PROJECT_DIR = %s' % PROJECT_DIR)
 print(' >> STATIC_ROOT = %s' % STATIC_ROOT)
 print(' >> MEDIA_ROOT = %s' % MEDIA_ROOT)
 
-WIKI_ANONYMOUS_WRITE = get_bool_var('WIKI_ANONYMOUS_WRITE', True)
-WIKI_ANONYMOUS_CREATE = get_bool_var('WIKI_ANONYMOUS_CREATE', False)
+# WIKI_ANONYMOUS_WRITE = get_bool_var('WIKI_ANONYMOUS_WRITE', True)
+# WIKI_ANONYMOUS_CREATE = get_bool_var('WIKI_ANONYMOUS_CREATE', False)
+WIKI_ANONYMOUS_WRITE = False
+WIKI_ANONYMOUS_CREATE = False

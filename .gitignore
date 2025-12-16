@@ -1,5 +1,5 @@
-/project/wikiproject/db/db.sqlite3
-/.helpers/*
-!/.helpers/.gitkeep
+db.sqlite3
+__pycache__
 *.pyc
-!/project/wikiproject/media/wiki/riotkit/css/style.css
+.venv
+**/static

@@ -1,54 +1,44 @@
 .SILENT:
-SUDO=sudo
-SHELL=/bin/bash
+SHELL = /bin/bash
+TAG = slavik0/django-wiki
+VERSION ?= "0.12.0"
+HOST_PORT ?= 8000
+ADMIN_USER ?= "admin"
+ADMIN_PASSWORD ?= "admin"
+ADMIN_EMAIL ?= "admin@example.org"
+
 .PHONY: help
-RIOTKIT_UTILS_VER=v1.2.3
-
 help:
-	@grep -E '^[a-zA-Z\-\_0-9\.@]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z\-\_0-9\.@]+:.*?## .*$$' $(MAKEFILE_LIST) \
+		| sort \
+		| awk 'BEGIN {FS = ":.*?## "}; \
+			{printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-build: ## Build the image (VERSION)
+build:  ## Build docker image (VERSION)
 	[[ "${VERSION}" ]] || (echo "VERSION param is required" && exit 1)
 	echo " >> Building ${VERSION}"
-	${SUDO} docker build --build-arg VERSION=${VERSION} . -f ./Dockerfile -t quay.io/riotkit/django-wiki:${TAG}
+	docker build \
+		--build-arg VERSION=${VERSION} \
+		-t ${TAG}:${VERSION} \
+		-t $(TAG):$(shell date +%Y%m%d) \
+		-t ${TAG}:latest .
 
-build_snapshot: ## Build current snapshot
-	make build VERSION=master TAG=dev-snapshot
+push:  ## Push image to the registry
+	docker push --all-tags ${TAG}
 
-push: ## Push to the registry
-	${SUDO} docker push quay.io/riotkit/django-wiki:${TAG}
+run:  ## Run a test instance (VERSION)
+	docker run \
+		--interactive \
+		--tty \
+		--publish ${HOST_PORT}:8000 \
+		--name wiki \
+		--env DEBUG=true \
+		--env ADMIN_USER=${ADMIN_USER} \
+		--env ADMIN_PASSWORD=${ADMIN_PASSWORD} \
+		--env ADMIN_EMAIL=${ADMIN_EMAIL} \
+		--rm \
+		$(TAG):latest
 
-run: ## Run a test instance (VERSION)
-	${SUDO} docker run --name djangowiki_test -p 8000:8000 -e DEBUG=true --rm quay.io/riotkit/django-wiki:${VERSION}
-
-
-### COMMON AUTOMATION
-
-generate_readme: ## Renders the README.md from README.md.j2
-	RIOTKIT_PATH=./.helpers ./.helpers/docker-generate-readme
-
-before_commit: generate_readme ## Git hook before commit
-	git add README.md
-
-develop: ## Setup development environment, install git hooks
-	echo " >> Setting up GIT hooks for development"
-	mkdir -p .git/hooks
-	echo "#\!/bin/bash" > .git/hooks/pre-commit
-	echo "make before_commit" >> .git/hooks/pre-commit
-	chmod +x .git/hooks/pre-commit
-
-all: _download_tools ## Build all recent versions from github
-	BUILD_PARAMS="--dont-rebuild "; \
-	if [[ "$$TRAVIS_COMMIT_MESSAGE" == *"@force-rebuild"* ]]; then \
-		BUILD_PARAMS=" "; \
-	fi; \
-	./.helpers/for-each-github-release --exec "make build push VERSION=%RELEASE_TAG% TAG=%RELEASE_TAG%" --repo-name django-wiki/django-wiki --dest-docker-repo quay.io/riotkit/django-wiki $${BUILD_PARAMS}--allowed-tags-regexp="releases/([0-9\.]+)$$" --release-tag-template="%MATCH_0%" --max-versions=5 --verbose
-	make build_snapshot
-	make push TAG=dev-snapshot
-
-_download_tools:
-	curl -s https://raw.githubusercontent.com/riotkit-org/ci-utils/${RIOTKIT_UTILS_VER}/bin/extract-envs-from-dockerfile > .helpers/extract-envs-from-dockerfile
-	curl -s https://raw.githubusercontent.com/riotkit-org/ci-utils/${RIOTKIT_UTILS_VER}/bin/env-to-json                  > .helpers/env-to-json
-	curl -s https://raw.githubusercontent.com/riotkit-org/ci-utils/${RIOTKIT_UTILS_VER}/bin/for-each-github-release      > .helpers/for-each-github-release
-	curl -s https://raw.githubusercontent.com/riotkit-org/ci-utils/${RIOTKIT_UTILS_VER}/bin/docker-generate-readme       > .helpers/docker-generate-readme
-	chmod +x .helpers/extract-envs-from-dockerfile .helpers/env-to-json .helpers/for-each-github-release .helpers/docker-generate-readme
+.PHONY: clean
+clean:
+	docker images | grep -E "${TAG}|none" | awk '{print $$3}' | xargs docker rmi -f
