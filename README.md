@@ -1,13 +1,16 @@
-Docker image for Django Wiki v. 0.11.2
-======================================
+# Docker image for Django Wiki v. 0.11.2
 
 [![Build Status](https://github.com/sv0/docker-django-wiki/actions/workflows/docker-image.yml/badge.svg)](https://github.com/sv0/docker-django-wiki/actions/workflows/docker-image.yml)
 
-Usage -----
+## Usage
 
-```bash docker run --name django-wiki --rm slavik0/django-wiki:0.11.2 ```
+```bash
 
-Configuration reference -----------------------
+    docker run --name django-wiki --rm slavik0/django-wiki:0.11.2
+
+```
+
+## Configuration reference -----------------------
 
 List of all environment variables that could be used.
 
@@ -27,13 +30,11 @@ DEBUG # (default: false)
 # Timezone
 TZ # (default: Europe/Warsaw)
 
-
 USE_TZ # (default: true)
 
 # Application language (see:
 http://www.i18nguy.com/unicode/language-identifiers.html)
 LANGUAGE_CODE # (default: en-US)
-
 
 SITE_ID # (default: 1)
 
@@ -104,17 +105,15 @@ DJANGO_GROUP_ID # (default: 1000)
 # Optional parameters to the GUNICORN eg. # --reload for development mode (to
 reload when code changes on the fly)
 GUNICORN_OPTS # (default: "")
-
-
 ```
 
-Volumes -------
+## Volumes
 
 - /project/wikiproject/settings/secret_key
 - /project/wikiproject/media
 - /project/wikiproject/db (important if using SQLite3 database)
 
-Developing the container ------------------------
+## Developing the container
 
 - The container is built on quay.io and hub.docker com
 - When you start working on it locally, at first run `make develop` to install
@@ -123,17 +122,17 @@ Developing the container ------------------------
   generated version!
 - Use `make` for building, pushing, etc.
 
-Releasing ---------
+## Releasing
 
-On Travis CI the build is triggered each month, then all recent versions of
+~~On Travis CI the build is triggered each month, then all recent versions of
 Django Wiki are built. Already existing docker tags are not overwritten. The
 build is also triggered on-commit. Snapshot version is made from master branch,
-and is always a latest master, can be unstable.
+and is always a latest master, can be unstable.~~
 
 To release a bugfix version and REBUILD EXISTING TAGS just add "@force-rebuild"
 in commit message, recent 5 tags will be rebuilt (not all in registry).
 
-Copyleft --------
+## Copyleft
 
 Created by **RiotKit Collective**, a libertarian, grassroot, non-profit
 organization providing technical support for the non-profit Anarchist movement.
